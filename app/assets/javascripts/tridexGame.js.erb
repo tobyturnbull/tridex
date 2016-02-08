@@ -1,0 +1,16 @@
+var game = new Phaser.Game(1257, 684, Phaser.AUTO, '', { preload: preload, create: create, update: update })
+
+function preload(){
+  game.load.image('sky', '<%= image_path "sky.png" %>');
+}
+
+function create(){
+  game.physics.startSystem(Phaser.Physics.ARCADE);
+  game.add.sprite(0, 0, 'sky')
+}
+
+function update(){
+  return
+}
+
+console.log("Test")
