@@ -5,6 +5,7 @@ function preload(){
   game.load.spritesheet('player', '<%= image_path "player.png" %>', 43, 39);
   game.load.image('bullet', '<%= image_path "bullet.png" %>', 25, 11);
   game.load.spritesheet('boss', '<%= image_path "joel.png" %>', 93, 75);
+  game.load.spritesheet('enemy', '<%= image_path "joelEnemy.png" %>', 146, 112)
 }
 
 var background;
@@ -14,6 +15,7 @@ var cursors;
 var fire;
 var enemies;
 var boss;
+// var enemy;
 
 
 function create(){
@@ -22,16 +24,18 @@ function create(){
 
   game.physics.startSystem(Phaser.Physics.ARCADE);
 
-  game.world.setBounds(0, 0, 1257, 684)
+  game.world.setBounds(0, 0, game.canvas.width, game.canvas.height);
 
   player = game.add.sprite(50, 50, 'player');
   boss = game.add.sprite(200, 200, 'boss')
+  // enemy = game.add.sprite(50, 50, 'enemy')
 
   cursors = game.input.keyboard.createCursorKeys();
 
   game.physics.arcade.enable(player);
   game.physics.arcade.enable(bullets);
   game.physics.arcade.enable(boss);
+  // game.physics.arcade.enable(enemy);
   // bullets.outOfBoundsKill = true;
 
   game.camera.follow(player);
@@ -59,8 +63,23 @@ function update(){
     };
   };
 
-  game.physics.arcade.overlap(boss, bullets, bulletHit, null, this);
+  var enemyCreator = function(){
+    if (player._exists) {
+    //  console.log(bullets);
+    var randomValue = game.rnd.integerInRange(0, game.canvas.height)
+    var e = enemies.create(game.canvas.width, randomValue, 'enemy');
+    game.physics.arcade.enable(e);
+    e.body.velocity.x = -150;
+    game.physics.arcade.overlap(e, bullets, bulletHitEnemy, null, this);
+    //bullets.setAll('this.body.velocity.x', 300);
+    // bullets.set(b, 'this.body.velocity.x', 300, true, true, 0, false);
+    //bullets.body.velocity.x = 300;
+    };
+  };
+
+  game.physics.arcade.overlap(boss, bullets, bulletHitBoss, null, this);
   game.physics.arcade.overlap(player, boss, touchBoss, null, this);
+  game.physics.arcade.overlap(enemies, bullets, bulletHitEnemy, null, this);
 
   player.body.velocity.x = 0;
   player.body.velocity.y = 0;
@@ -125,15 +144,30 @@ function update(){
       fire();
   }
 
+  if (game.input.keyboard.isDown(Phaser.Keyboard.X)) {
+      enemyCreator();
+  }
+
 }
 
 // console.log("Test")
 
-function bulletHit (boss, bullet) {
-  boss.frame = 1;
+function bulletHitBoss (boss, bullet) {
+  boss.frame = 2;
+  bullet.kill();
   // player.kill();
 }
 
 function touchBoss (player, boss) {
   player.kill();
+}
+
+function bulletHitEnemy (enemies, bullet) {
+  // if (enemy.frame === 0){
+  //   enemy.frame = 1;
+  // } else {
+  enemies.kill();
+  // }
+  bullet.kill();
+
 }
