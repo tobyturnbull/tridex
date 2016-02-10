@@ -3,80 +3,110 @@ var game = new Phaser.Game(1257, 684, Phaser.AUTO, '', { preload: preload, creat
 function preload(){
   game.load.image('sky', '<%= image_path "sky.png" %>');
   game.load.spritesheet('player', '<%= image_path "player.png" %>', 43, 39);
+  game.load.image('bullet', '<%= image_path "bullet.png" %>', 25, 11)
 }
 
+var background;
 var player;
+var bullet;
 var cursors;
+var fire;
+
 
 function create(){
   game.physics.startSystem(Phaser.Physics.ARCADE);
 
+  game.world.setBounds(0, 0, 1257, 684)
+
   player = game.add.sprite(50, 50, 'player');
+  bullet = game.add.sprite(50, 50, 'bullet')
 
   cursors = game.input.keyboard.createCursorKeys();
 
   game.physics.arcade.enable(player);
+  game.physics.arcade.enable(bullet);
+
+  game.camera.follow(player);
+
+  player.body.collideWorldBounds = true;
+
+  // game.background.fixedToCamera = true
+
+  // game.camera.follow(player);
+
 
 }
 
 function update(){
+
+  var fire = function(){
+    game.add.sprite(player.body.x, player.body.y)
+    bullet.all.body.velocity.x = 300;
+  }
+
   player.body.velocity.x = 0;
   player.body.velocity.y = 0;
 
-    if (cursors.up.isDown && cursors.left.isDown)
-    {
-      player.body.velocity.y = -300;
-      player.body.velocity.x = -300;
-      player.frame = 1;
-    }
-    else if (cursors.up.isDown && cursors.right.isDown)
-    {
-      player.body.velocity.y = -300;
-      player.body.velocity.x = 300;
-      player.frame = 7;
-    }
-    else if (cursors.down.isDown && cursors.left.isDown)
-    {
-      player.body.velocity.y = 300;
-      player.body.velocity.x = -300;
-      player.frame = 2;
-    }
-    else if (cursors.down.isDown && cursors.right.isDown)
-    {
-      player.body.velocity.y = 300;
-      player.body.velocity.x = 300;
-      player.frame = 8;
-    }
-    else if (cursors.left.isDown)
-    {
-      player.body.velocity.x = -300;
-
-        // player.animations.play('left');
-      player.frame = 0;
-    }
-    else if (cursors.right.isDown)
-    {
-      player.body.velocity.x = 300;
-      player.frame = 6;
-    }
-    else if (cursors.up.isDown)
-    {
-      player.body.velocity.y = -200
-      player.frame = 4;
-      player.body.velocity.x = -50;
-    }
-    else if (cursors.down.isDown)
-    {
-      player.body.velocity.y = 200
-      player.frame = 5;
-      player.body.velocity.x = -50;
-    }
-    else
-    {
-      player.animations.stop();
-      player.frame = 3;
-      player.body.velocity.x = -50;
-    }
+  if (cursors.up.isDown && cursors.left.isDown)
+  {
+    player.body.velocity.y = -300;
+    player.body.velocity.x = -300;
+    player.frame = 1;
   }
+  else if (cursors.up.isDown && cursors.right.isDown)
+  {
+    player.body.velocity.y = -300;
+    player.body.velocity.x = 300;
+    player.frame = 7;
+  }
+  else if (cursors.down.isDown && cursors.left.isDown)
+  {
+    player.body.velocity.y = 300;
+    player.body.velocity.x = -300;
+    player.frame = 2;
+  }
+  else if (cursors.down.isDown && cursors.right.isDown)
+  {
+    player.body.velocity.y = 300;
+    player.body.velocity.x = 300;
+    player.frame = 8;
+  }
+  else if (cursors.left.isDown)
+  {
+    player.body.velocity.x = -300;
+
+      // player.animations.play('left');
+    player.frame = 0;
+  }
+  else if (cursors.right.isDown)
+  {
+    player.body.velocity.x = 300;
+    player.frame = 6;
+  }
+  else if (cursors.up.isDown)
+  {
+    player.body.velocity.y = -200
+    player.frame = 4;
+    player.body.velocity.x = -50;
+  }
+  else if (cursors.down.isDown)
+  {
+    player.body.velocity.y = 200
+    player.frame = 5;
+    player.body.velocity.x = -50;
+    bullet.body.velocity.x = 50;
+  }
+  else
+  {
+    player.animations.stop();
+    player.frame = 3;
+    player.body.velocity.x = -50;
+
+  }
+
+  if (game.input.keyboard.isDown(Phaser.Keyboard.Z)) {
+      fire();
+  }
+}
 
 console.log("Test")
