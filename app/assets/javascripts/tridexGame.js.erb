@@ -8,23 +8,25 @@ function preload(){
 
 var background;
 var player;
-var bullet;
+var bullets;
 var cursors;
 var fire;
 
 
 function create(){
+  bullets = game.add.group();
+
   game.physics.startSystem(Phaser.Physics.ARCADE);
 
   game.world.setBounds(0, 0, 1257, 684)
 
   player = game.add.sprite(50, 50, 'player');
-  bullet = game.add.sprite(50, 50, 'bullet')
 
   cursors = game.input.keyboard.createCursorKeys();
 
   game.physics.arcade.enable(player);
-  game.physics.arcade.enable(bullet);
+  game.physics.arcade.enable(bullets);
+  // bullets.outOfBoundsKill = true;
 
   game.camera.follow(player);
 
@@ -40,9 +42,16 @@ function create(){
 function update(){
 
   var fire = function(){
-    game.add.sprite(player.body.x, player.body.y)
-    bullet.all.body.velocity.x = 300;
-  }
+    //  console.log(bullets);
+    var b = bullets.create(player.body.x, player.body.y, 'bullet');
+    game.physics.arcade.enable(b);
+console.log(b);
+
+  b.body.velocity.x = 300;
+    //bullets.setAll('this.body.velocity.x', 300);
+    // bullets.set(b, 'this.body.velocity.x', 300, true, true, 0, false);
+    //bullets.body.velocity.x = 300;
+  };
 
   player.body.velocity.x = 0;
   player.body.velocity.y = 0;
@@ -94,7 +103,6 @@ function update(){
     player.body.velocity.y = 200
     player.frame = 5;
     player.body.velocity.x = -50;
-    bullet.body.velocity.x = 50;
   }
   else
   {
@@ -107,6 +115,7 @@ function update(){
   if (game.input.keyboard.isDown(Phaser.Keyboard.Z)) {
       fire();
   }
+
 }
 
 console.log("Test")
