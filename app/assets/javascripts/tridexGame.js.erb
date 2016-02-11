@@ -5,7 +5,7 @@ function preload(){
   // game.load.image('sky', '<%= image_path "sky.png" %>');
   game.load.spritesheet('player', '<%= image_path "player.png" %>', 43, 39);
   game.load.image('bullet', '<%= image_path "bullet.png" %>', 25, 11);
-  game.load.spritesheet('boss', '<%= image_path "joel.png" %>', 93, 75);
+  game.load.spritesheet('boss', '<%= image_path "khaled.png" %>', 93, 75);
   game.load.spritesheet('enemy', '<%= image_path "joelEnemy.png" %>', 146, 112);
   game.load.image('sprite', '<%= image_path "sprite.png" %>', 68, 219);
   game.load.image('start', '<%= image_path "startMessage" %>')
@@ -61,7 +61,7 @@ function create(){
   over = game.add.image(350, 200, 'over')
   start = game.add.image(350, 200, 'start');
   game.physics.enable(boss, Phaser.Physics.ARCADE);
-  boss.body.velocity.setTo(300, 300);
+  boss.body.velocity.setTo(700, 700);
   boss.body.collideWorldBounds = true;
   // playerLives = game.add.sprite(500, 500, 'player')
 
@@ -131,7 +131,7 @@ function update(){
 
   var enemyCreator = function(){
     if (player._exists){
-      console.log ('fired')
+      // console.log ('fired')
       var randomValue = game.rnd.integerInRange(0, game.canvas.height)
         // game.physics.arcade.enable(joel);
         // joel.body.velocity.x = -50;
@@ -139,10 +139,10 @@ function update(){
         // bossExists = true;
         var e = enemies.create(game.canvas.width, randomValue, 'enemy');
         game.physics.arcade.enable(e, Phaser.Physics.ARCADE);
-        e.body.velocity.x = -150;
+        e.body.velocity.x = -200;
         game.physics.arcade.overlap(e, bullets, bulletHitEnemy, null, this);
         game.physics.enable(boss, Phaser.Physics.ARCADE);
-        e.body.velocity.setTo((Math.floor(Math.random() * 500) + 1), (Math.floor(Math.random() * 500) + 1));
+        e.body.velocity.setTo((Math.floor(Math.random() * 973) + 1), (Math.floor(Math.random() * 750) + 1));
         e.body.collideWorldBounds = true;
         e.body.bounce.set(1);
         e.body.gravity.set(0, 0);
@@ -236,14 +236,18 @@ function update(){
 
   if (game.input.keyboard.isDown(Phaser.Keyboard.X)) {
     // enemyCreator();
+    if (start._exists){
     setInterval(enemyCreator, 8000);
+  };
     // setInterval(bossCreator, 10000);
     start.kill();
     if(!player._exists){
-    score = 0;
+    score += 0;
     enemies.destroy();
     player = game.add.sprite(50, 50, 'player');
     game.physics.arcade.enable(player);
+    player.body.collideWorldBounds = true;
+    setInterval(enemyCreator, 8000);
 
   };
     if (over._exists){
@@ -298,7 +302,7 @@ function bulletHitEnemy (enemies, bullet) {
     return;
   } else if (enemies.frame === 1) {
   enemies.kill();
-  score += 420;
+  score += 1;
   scoreText.text = 'Score: ' + score;
   // livesText.text += ' Lives: ' + lives;
 
