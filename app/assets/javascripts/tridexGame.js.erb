@@ -10,6 +10,7 @@ function preload(){
   game.load.image('sprite', '<%= image_path "sprite.png" %>', 68, 219);
   game.load.image('start', '<%= image_path "startMessage" %>')
   game.load.image('over', '<%= image_path "overMessage" %>')
+  game.load.spritesheet('joel', '<%= image_path "jolol.png" %>', 78, 90)
 };
 
 var starfield;
@@ -58,11 +59,11 @@ function create(){
   game.world.setBounds(0, 0, game.canvas.width, game.canvas.height);
 
   player = game.add.sprite(50, 50, 'player');
-  boss = game.add.sprite(200, 200, 'boss');
+  boss = game.add.sprite(200, 200, 'joel');
   over = game.add.image(350, 200, 'over')
   start = game.add.image(350, 200, 'start');
   game.physics.enable(boss, Phaser.Physics.ARCADE);
-  boss.body.velocity.setTo(700, 700);
+  boss.body.velocity.setTo(300, 300);
   boss.body.collideWorldBounds = true;
   // playerLives = game.add.sprite(500, 500, 'player')
 
@@ -74,7 +75,7 @@ function create(){
   game.physics.arcade.enable(enemies);
   game.physics.arcade.enable(bosses);
 
-  boss.body.bounce.set(1.0);
+  boss.body.bounce.set(1);
 
   boss.body.gravity.set(0, 0);
 
@@ -145,7 +146,7 @@ function update(){
         game.physics.enable(boss, Phaser.Physics.ARCADE);
         e.body.velocity.setTo((Math.floor(Math.random() * 1000) + 1), (Math.floor(Math.random() * 750) + 1));
         e.body.collideWorldBounds = true;
-        e.body.bounce.set(1);
+        e.body.bounce.set(1.05);
         e.body.gravity.set(0, 0);
       };
     };
@@ -239,16 +240,20 @@ function update(){
     // enemyCreator();
     if (start._exists){
     setInterval(enemyCreator, 3560);
+    boss.body.velocity.setTo(750, 750);
+
   };
     // setInterval(bossCreator, 10000);
     start.kill();
     if(!player._exists){
     score += 0;
     enemies.destroy();
+    setInterval(enemyCreator, 4000);
+    boss.sprite = 0;
+    boss.body.velocity.setTo(750, 750);
     player = game.add.sprite(50, 50, 'player');
     game.physics.arcade.enable(player);
     player.body.collideWorldBounds = true;
-    setInterval(enemyCreator, 4000);
   };
 
     if (over._exists){
@@ -287,6 +292,8 @@ function playerHit () {
   // if (playerLives === 1){
   player.kill();
   over = game.add.image(350, 200, 'over');
+  boss.frame = 1;
+  boss.body.velocity.setTo(300, 300);
   // } else {
   //   playerLives = playerLives - 1;
   // }
