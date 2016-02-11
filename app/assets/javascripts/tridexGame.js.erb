@@ -27,10 +27,11 @@ var scoreText;
 var playerHit;
 var playerLives = 3;
 var lives = 4;
-var bossHealth = 5;
+var bossHealth = 10;
 var bossExists = false;
 var invincible = false;
 var joel;
+var enemyCreator;
 
 function create(){
 
@@ -53,7 +54,7 @@ function create(){
   player = game.add.sprite(50, 50, 'player');
   boss = game.add.sprite(200, 200, 'boss');
   game.physics.enable(boss, Phaser.Physics.ARCADE);
-  boss.body.velocity.setTo(400, 400);
+  boss.body.velocity.setTo(800, 800);
   boss.body.collideWorldBounds = true;
   // playerLives = game.add.sprite(500, 500, 'player')
 
@@ -64,26 +65,30 @@ function create(){
   game.physics.arcade.enable(boss);
   game.physics.arcade.enable(enemies);
 
-  boss.body.bounce.set(1.1);
+  boss.body.bounce.set(1.0);
 
   boss.body.gravity.set(0, 0);
+
   // bullets.outOfBoundsKill = true;
 
   game.camera.follow(player);
 
   player.body.collideWorldBounds = true;
 
-
   scoreText = game.add.text(550, 50, 'Score: 0', { fontSize: '32px', fill: 'white' });
+
   // livesText = game.add.text((game.canvas.width / 2), 50, 'Lives: 3', { fontSize: '32px', fill: 'white' });
 
   // game.background.fixedToCamera = true
 
   // game.camera.follow(player);
 
+
 }
 
 function update(){
+
+
 
   starfield.tilePosition.x += -9;
 
@@ -123,7 +128,7 @@ function update(){
       joel.body.velocity.x = -50;
       game.physics.arcade.overlap(joel, bullets, bulletHitBoss, null, this);
       bossExists = true;
-    }else if (game.time.now <= 20001){
+    }else{
       var e = enemies.create(game.canvas.width, randomValue, 'enemy');
       game.physics.arcade.enable(e, Phaser.Physics.ARCADE);
       e.body.velocity.x = -150;
@@ -135,6 +140,8 @@ function update(){
       e.body.gravity.set(0, 0);
     };
   };
+
+  game.time.events.start(Phaser.Timer.SECOND * 2, enemyCreator)
 
   game.physics.arcade.overlap(boss, bullets, bulletHitBoss, null, this);
   game.physics.arcade.overlap(player, boss, playerHit, null, this);
@@ -199,11 +206,15 @@ function update(){
   }
 
   if (game.input.keyboard.isDown(Phaser.Keyboard.Z)) {
-      fire();
+    fire();
   }
 
   if (game.input.keyboard.isDown(Phaser.Keyboard.X)) {
-      enemyCreator();
+    enemyCreator();
+  }
+
+  if (game.input.keyboard.isDown(Phaser.Keyboard.Q)) {
+    throttle = true;
   }
 
 };
@@ -223,7 +234,7 @@ function bulletHitBoss (boss, bullet) {
       boss.frame = 2;
       bullet.kill();
       score += 5000;
-      player.kill();
+      // player.kill();
       boss.kill();
   };
 }
@@ -235,6 +246,8 @@ function bulletHitBoss (boss, bullet) {
 //     playerLives = playerLives - 1;
 //   }
 // }
+
+setInterval(enemyCreator, 3000)
 
 function bulletHitEnemy (enemies, bullet) {
   console.log('hit', enemies.frame);
@@ -249,6 +262,10 @@ function bulletHitEnemy (enemies, bullet) {
   // livesText.text += ' Lives: ' + lives;
 
   return;
+
+
   }
+
+
 
 };
