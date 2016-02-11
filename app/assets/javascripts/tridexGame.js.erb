@@ -1,13 +1,16 @@
 var game = new Phaser.Game(1257, 684, Phaser.AUTO, '', { preload: preload, create: create, update: update });
 
 function preload(){
-  game.load.image('sky', '<%= image_path "sky.png" %>');
+  game.load.image('starfield', '<%= image_path "starfield2.png" %>')
+  // game.load.image('sky', '<%= image_path "sky.png" %>');
   game.load.spritesheet('player', '<%= image_path "player.png" %>', 43, 39);
   game.load.image('bullet', '<%= image_path "bullet.png" %>', 25, 11);
   game.load.spritesheet('boss', '<%= image_path "joel.png" %>', 93, 75);
-  game.load.spritesheet('enemy', '<%= image_path "joelEnemy.png" %>', 146, 112)
-}
+  game.load.spritesheet('enemy', '<%= image_path "joelEnemy.png" %>', 146, 112);
+  game.load.image('sprite', '<%= image_path "sprite.png" %>', 68, 219);
+};
 
+var starfield;
 var background;
 var player;
 var bullets;
@@ -17,63 +20,91 @@ var enemies;
 var boss;
 var nextShotAt;
 var shotDelay;
+var nextHitAt;
+var hitDelay;
 var score = 0;
 var scoreText;
 var playerHit;
 var playerLives = 3;
+var lives = 4;
 var bossHealth = 5;
 var bossExists = false;
-// var enemy;
-
+var invincible = false;
+var joel;
 
 function create(){
+
+  starfield = game.add.tileSprite(0, 0, 1257, 684, 'starfield');
+  var joel = game.add.sprite(game.canvas.width, (game.canvas.height / 2), 'boss');
+
   bullets = game.add.group();
   enemies = game.add.group();
 
   nextShotAt = 0;
   shotDelay = 300;
 
+  nextHitAt = 0;
+  hitDelay = 3000;
+
   game.physics.startSystem(Phaser.Physics.ARCADE);
 
   game.world.setBounds(0, 0, game.canvas.width, game.canvas.height);
 
   player = game.add.sprite(50, 50, 'player');
-  boss = game.add.sprite(200, 200, 'boss')
+  boss = game.add.sprite(200, 200, 'boss');
+  game.physics.enable(boss, Phaser.Physics.ARCADE);
+  boss.body.velocity.setTo(400, 400);
+  boss.body.collideWorldBounds = true;
+  // playerLives = game.add.sprite(500, 500, 'player')
 
   cursors = game.input.keyboard.createCursorKeys();
 
   game.physics.arcade.enable(player);
   game.physics.arcade.enable(bullets);
   game.physics.arcade.enable(boss);
-  // game.physics.arcade.enable(enemy);
+  game.physics.arcade.enable(enemies);
+
+  boss.body.bounce.set(1.1);
+
+  boss.body.gravity.set(0, 0);
   // bullets.outOfBoundsKill = true;
 
   game.camera.follow(player);
 
   player.body.collideWorldBounds = true;
 
-  scoreText = game.add.text((game.canvas.width / 2), 50, 'score: 0', { fontSize: '32px', fill: 'white' });
+
+  scoreText = game.add.text(550, 50, 'Score: 0', { fontSize: '32px', fill: 'white' });
+  // livesText = game.add.text((game.canvas.width / 2), 50, 'Lives: 3', { fontSize: '32px', fill: 'white' });
 
   // game.background.fixedToCamera = true
 
   // game.camera.follow(player);
 
-
 }
 
 function update(){
 
-  var playerHit = function(){
-    playerLives = playerLives - 1;
+  starfield.tilePosition.x += -9;
 
-  }
+  // var playerHit = function(){
+  //   if (player._exists && hitDelay < game.time.now){
+  //     if (lives >= 1){
+  //       lives = lives - 1;
+  //       hitDelay = game.time.now + 3000;
+  //       player.frame = 9;
+  //     } else {
+  //     player.kill();
+  //     }};
+  //   };
+
 
   var fire = function(){
     if (player._exists && shotDelay < game.time.now){
       var b = bullets.create(player.body.x, player.body.y, 'bullet');
       game.physics.arcade.enable(b);
       b.body.velocity.x = 450;
-      shotDelay = game.time.now + 500;
+      shotDelay = game.time.now + 300;
 
     } else {
       return;
@@ -88,21 +119,27 @@ function update(){
   var enemyCreator = function(){
     var randomValue = game.rnd.integerInRange(0, game.canvas.height)
     if (game.time.now >= 20000 && player._exists && bossExists === false) {
-      var joel = game.add.sprite(game.canvas.width, (game.canvas.height / 2), 'boss');
       game.physics.arcade.enable(joel);
-      joel.body.velocity.x = -150;
+      joel.body.velocity.x = -50;
+      game.physics.arcade.overlap(joel, bullets, bulletHitBoss, null, this);
       bossExists = true;
     }else if (game.time.now <= 20001){
       var e = enemies.create(game.canvas.width, randomValue, 'enemy');
-      game.physics.arcade.enable(e);
+      game.physics.arcade.enable(e, Phaser.Physics.ARCADE);
       e.body.velocity.x = -150;
       game.physics.arcade.overlap(e, bullets, bulletHitEnemy, null, this);
+      game.physics.enable(boss, Phaser.Physics.ARCADE);
+      e.body.velocity.setTo(400, 400);
+      e.body.collideWorldBounds = true;
+      e.body.bounce.set(1);
+      e.body.gravity.set(0, 0);
     };
   };
 
   game.physics.arcade.overlap(boss, bullets, bulletHitBoss, null, this);
-  game.physics.arcade.overlap(player, boss, touchBoss, null, this);
+  game.physics.arcade.overlap(player, boss, playerHit, null, this);
   game.physics.arcade.overlap(enemies, bullets, bulletHitEnemy, null, this);
+  game.physics.arcade.overlap(enemies, player, playerHit, null, this);
 
   player.body.velocity.x = 0;
   player.body.velocity.y = 0;
@@ -134,8 +171,6 @@ function update(){
   else if (cursors.left.isDown)
   {
     player.body.velocity.x = -300;
-
-      // player.animations.play('left');
     player.frame = 0;
   }
   else if (cursors.right.isDown)
@@ -187,17 +222,19 @@ function bulletHitBoss (boss, bullet) {
     } else {
       boss.frame = 2;
       bullet.kill();
+      score += 5000;
+      player.kill();
+      boss.kill();
   };
 }
 
-function touchBoss (player, boss) {
-  if (playerLives === 1){
-  player.kill();
-  } else {
-    playerLives = playerLives - 1;
-  }
-
-}
+// function touchBoss (player, boss) {
+//   if (playerLives === 1){
+//   player.kill();
+//   } else {
+//     playerLives = playerLives - 1;
+//   }
+// }
 
 function bulletHitEnemy (enemies, bullet) {
   console.log('hit', enemies.frame);
@@ -207,8 +244,10 @@ function bulletHitEnemy (enemies, bullet) {
     return;
   } else if (enemies.frame === 1) {
   enemies.kill();
-  score += 500;
+  score += 420;
   scoreText.text = 'Score: ' + score;
+  // livesText.text += ' Lives: ' + lives;
+
   return;
   }
 
